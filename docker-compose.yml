@@ -1,0 +1,31 @@
+services:
+  ollama:
+    image: ollama/ollama
+    volumes:
+      - ollama:/root/.ollama
+    ports:
+      - "11434:11434"
+
+  # One-off job: downloads the models into the ollama volume, then exits
+  pull-models:
+    image: ollama/ollama
+    depends_on: [ollama]
+    environment:
+      - OLLAMA_HOST=ollama:11434
+    entrypoint: ["/bin/sh", "-c", "sleep 3 && ollama pull ${CHAT_MODEL:-llama3.2:3b} && ollama pull ${EMBED_MODEL:-nomic-embed-text}"]
+
+  app:
+    build: .
+    depends_on: [ollama]
+    environment:
+      - LLM_BASE_URL=http://ollama:11434/v1
+      - CHAT_MODEL=${CHAT_MODEL:-llama3.2:3b}
+      - EMBED_MODEL=${EMBED_MODEL:-nomic-embed-text}
+      - DATA_DIR=/app/data
+    volumes:
+      - ./data:/app/data
+    ports:
+      - "8501:8501"
+
+volumes:
+  ollama:
