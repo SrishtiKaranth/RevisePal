@@ -1,0 +1,5 @@
+openai>=1.40
+chromadb>=0.5
+pypdf>=4.0
+streamlit>=1.38
+pytest>=8.0
